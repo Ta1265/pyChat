@@ -7,7 +7,7 @@ HEADERSIZE = 10 #constant
 
 class pyChat:
 
-	def client_start(self, IP = '127.0.0.1', PORT = 1303):
+	def client_start(self, IP, PORT):
 
 		self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		try: self.server_sock.connect((IP,PORT))
@@ -40,8 +40,7 @@ class pyChat:
 			else:
 				print(msg)
 				
-	def server_start(self, IP, PORT, PASSKEY = '' ):
-		self.PASSKEY = PASSKEY
+	def server_start(self, IP, PORT):
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) ##allows us to re-use the address somehow need to look more into it
 		self.connections = []
@@ -92,19 +91,21 @@ class pyChat:
 
 def main():
 
-	IP,PORT = '', ''
-	newServer = input("Create new server? enter [y/n] (Default is no) -> ")
-	IP = input("Enter IP -> ")
-	PORT = int(input("Enter PORT -> "))
+	if input("Create new server? enter [y/n] (Default is no) -> ") == 'y':
+		if input("Use default IP:PORT? [y/n] (Default = Taylors Home Desktop server info) -> ") == 'n':
+			IP = input("Enter new IP -> ")
+			PORT = int(input("Enter new PORT -> "))
+		else:
+			IP = '192.168.0.114'
+			PORT = 1303
 
-	if newServer == 'y':
-		if IP != '' and PORT != '': pyChat().server_start(IP,PORT)
-		else: pyChat().server_start()
+		pyChat().server_start(IP, PORT)
 			
 	#default to creating a client
 	else:
-		if IP != '' and PORT != '': pyChat().client_start(IP,PORT)
-		else: pyChat().client_start()
+		IP = input("Enter IP of server to connect to -> ") # manually enter public IP, cant share it on github
+		PORT = int(input("Enter PORT server to connect to-> "))
+		pyChat().client_start(IP, PORT)
 
 if __name__ == '__main__':
 	main()
