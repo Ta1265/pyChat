@@ -1,15 +1,9 @@
 import socket
 import threading
-import sys
 
 HEADERSIZE = 10 #constant
 
 
-######### Instructions ##########
-#### To start a server procces pass 'server' as a command line argument 
-#### example -> python3 pyChat.py server
-#### If no argument passed, a client process will be created by default.
-################################
 
 class pyChat:
 
@@ -33,7 +27,7 @@ class pyChat:
 		running = True #continuously take user input to send off 
 		while running:
 			userInput = input()
-			print ("\033[A                             \033[A") # Makes chat look neater
+			#print ("\033[A                             \033[A") # Makes chat look neater
 			self.send_msg(sock = self.server_sock, msg = userInput)
 			if userInput == 'EXIT': running = False
 
@@ -46,14 +40,14 @@ class pyChat:
 			else:
 				print(msg)
 				
-	def server_start(self, IP = '127.0.0.1',  PORT = 1303, PASSKEY = '' ):
+	def server_start(self, IP, PORT, PASSKEY = '' ):
 		self.PASSKEY = PASSKEY
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) ##allows us to re-use the address somehow need to look more into it
 		self.connections = []
-		try: self.sock.bind((IP,PORT))
+		try: self.sock.bind( (IP, PORT) )
 		except:
-			print(f'Failed to bind to PORT-{PORT} : IP-{IP}, Exiting')
+			print(f'Failed to bind to IP-{IP} : PORT-{PORT}, Exiting')
 			return False
 		self.sock.listen(5)
 		print(f'--- pyChat Server started on IP-{IP} : PORT-{PORT} ---')
@@ -83,7 +77,7 @@ class pyChat:
 	def server_blast_msg(self, sender_c, msg ):
 		print("server: ", msg)
 		for client in self.connections:
-			self.send_msg(sock = client, msg = msg)
+			if client != sender_c: self.send_msg(sock = client, msg = msg)
 
 	def send_msg(self, sock, msg): # helper works with both client/server methods
 		msg = (f'{len(msg):<{HEADERSIZE}}' + msg ).encode('UTF-8')
@@ -99,17 +93,17 @@ class pyChat:
 def main():
 
 	IP,PORT = '', ''
-	IP = input("Enter IP (leave empty for default)")
-	PORT = input("Enter PORT (leave empty for default)")
-	
-	#command line arguments
-	if len(sys.argv) > 1 and sys.argv[1] == 'server':
-		if IP != '' and PORT != '': pyChat().server_start(IP = IP, PORT = PORT)
+	newServer = input("Create new server? enter [y/n] (Default is no) -> ")
+	IP = input("Enter IP -> ")
+	PORT = int(input("Enter PORT -> "))
+
+	if newServer == 'y':
+		if IP != '' and PORT != '': pyChat().server_start(IP,PORT)
 		else: pyChat().server_start()
 			
 	#default to creating a client
 	else:
-		if IP != '' and PORT != '': pyChat().client_start(IP = IP, PORT = PORT)
+		if IP != '' and PORT != '': pyChat().client_start(IP,PORT)
 		else: pyChat().client_start()
 
 if __name__ == '__main__':
